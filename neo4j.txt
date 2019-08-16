@@ -1,0 +1,57 @@
+Find the actors who acted in more than 5 movies:
+
+MATCH (a:Actor)-[:ActedIn]->(:Movie)
+WITH a, count(*) as NumberofMovies
+WHERE NumberofMovies > 5
+RETURN a.actor_name
+
+Find all the actors who acted in at least one 10 rating movie (no dupliactes)
+
+MATCH (a:Actor)-[:ActedIn]->(m:Movie)
+WITH a.actor_name as name, m.ratings as ratings
+WHERE ratings = 10
+RETURN distinct name
+
+Find all the actors who acted in at least five 10 rating movies
+
+MATCH (a:Actor)-[:ActedIn]->(m:Movie{ratings:10})
+WITH a, count(*) as NumberofTenRatings
+WHERE NumberofTenRatings > 4
+RETURN distinct a.actor_name
+
+Find all the movies produced in USA with at least one actor from australia
+
+MATCH (a:Actor{birth_country:"Australia"})-[:ActedIn]->(m:Movie{country:"USA"})
+RETURN distinct movie_name
+
+MATCH (a:Actor)-[:ActedIn]->(m:Movie)
+WHERE a.birth_country = "Australia" AND m.country = "USA"
+RETURN distinct movie_name
+
+Find num of actors who acted in different kind of movies (more than 2 genres)
+
+MATCH (a:Actor)-[:ActedIn]->(m:Movie)
+WITH a.actor_name as name, count(distinct m.genre) as NumberofMovies #we are grouping by name
+WHERE NumberofMovies > 2
+RETURN count(distinct name) as number
+
+Find out the number and average raitngs of movies released each year and output the result in des order.
+
+MATCH (a:Actor)-[:ActedIn]->(m:Movie)
+WITH m.release_year as year, count(*) as number, avg(m.ratings) as AnuRatings
+RETURN year, number, AnuRatings
+ORDER BY number DESC
+
+For each movie m, display the total number of its actors who acted in at least one movie of which
+the genres different that of m.
+
+MATCH (n:Movie)<-[A2:ActedIn]-(a:Actor)-[A1:ActedIn]->(m:Movie) 
+# MATCH (n:Movie)<-[A2:ActedIn]-(a:Actor)
+# MATCH (m:Movie)<-[A1:ActedIn]-(a:Actor)
+WHERE n.genre <> m.genre
+WITH m, count(A1) as number
+RETURN m.movie_name, number
+
+
+
+
